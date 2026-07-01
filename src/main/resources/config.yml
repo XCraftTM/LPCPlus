@@ -41,3 +41,9 @@ group-formats:
 # - {username-color} and {message-color} are optional meta keys from LuckPerms
 # - You can create new groups by adding entries under group-formats
 # - PlaceholderAPI placeholders can be included, e.g., {player_health}, {vault_eco_balance}
+# - Grant 'lpcplus.colorcodes' to let players use '&' color codes in their messages
+# - Grant 'lpcplus.rgbcodes' to let players use '&#RRGGBB' hex codes in their messages
+# - Grant 'lpcplus.minimessage' to let players use full MiniMessage formatting in their
+#   messages (e.g. "<gradient:red:blue>hi</gradient>", "<rainbow>hi</rainbow>",
+#   "<hover:show_text:'hello'>hi</hover>"). This takes priority over the legacy/hex
+#   permissions above and falls back to them if the message isn't valid MiniMessage.

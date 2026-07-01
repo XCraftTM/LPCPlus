@@ -1,9 +1,11 @@
-name: ${project.name}
-description: ${project.description}
-version: ${project.version}
-main: ${main.class}
-author: ${author}
-api-version: 1.13
+name: LPCPlus
+description: A chat formatting plugin for LuckPerms.
+version: 3.7.0
+main: me.wikmor.lpcplus.LPCPlus
+authors:
+  - WikMor
+  - XCraftTM
+api-version: 1.21
 depend: [LuckPerms]
 softdepend: [PlaceholderAPI]
 commands:
@@ -11,3 +13,17 @@ commands:
     description: Reload the configuration of LPCPlus.
     permission: lpcplus.reload
     usage: "Usage: /lpcplus reload"
+permissions:
+  lpcplus.reload:
+    description: Allows reloading the LPCPlus configuration.
+    default: op
+  lpcplus.colorcodes:
+    description: Allows using '&' legacy color codes in chat.
+    default: false
+  lpcplus.rgbcodes:
+    description: Allows using '&#RRGGBB' hex color codes in chat.
+    default: false
+  lpcplus.minimessage:
+    description: Allows using MiniMessage formatting (colors, gradients, hover/click, etc.) in chat.
+    default: false
+
