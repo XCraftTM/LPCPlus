@@ -47,3 +47,8 @@ group-formats:
 #   messages (e.g. "<gradient:red:blue>hi</gradient>", "<rainbow>hi</rainbow>",
 #   "<hover:show_text:'hello'>hi</hover>"). This takes priority over the legacy/hex
 #   permissions above and falls back to them if the message isn't valid MiniMessage.
+# - The chat-format/group-formats strings themselves (including LuckPerms prefixes and
+#   suffixes) are also rendered through MiniMessage, so you can freely mix '&' codes,
+#   '&#RRGGBB' hex codes and native MiniMessage tags anywhere in the format, e.g.:
+#   "<gradient:red:blue>{prefix}</gradient>&f{name}&r: {message}"
+

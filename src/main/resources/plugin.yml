@@ -1,6 +1,6 @@
 name: LPCPlus
 description: A chat formatting plugin for LuckPerms.
-version: 3.7.0
+version: 3.7.1
 main: me.wikmor.lpcplus.LPCPlus
 authors:
   - WikMor

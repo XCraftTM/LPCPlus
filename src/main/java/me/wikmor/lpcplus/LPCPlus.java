@@ -27,10 +27,37 @@ import java.util.regex.Pattern;
 public final class LPCPlus extends JavaPlugin implements Listener {
 
 	private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
+	private static final Pattern LEGACY_CODE_PATTERN = Pattern.compile("(?i)&([0-9A-FK-OR])");
 	private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
 	private static final LegacyComponentSerializer AMPERSAND_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
 	private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 	private static final String MESSAGE_PLACEHOLDER = "{message}";
+
+	private static final Map<Character, String> LEGACY_TO_MINIMESSAGE = new HashMap<>();
+	static {
+		LEGACY_TO_MINIMESSAGE.put('0', "black");
+		LEGACY_TO_MINIMESSAGE.put('1', "dark_blue");
+		LEGACY_TO_MINIMESSAGE.put('2', "dark_green");
+		LEGACY_TO_MINIMESSAGE.put('3', "dark_aqua");
+		LEGACY_TO_MINIMESSAGE.put('4', "dark_red");
+		LEGACY_TO_MINIMESSAGE.put('5', "dark_purple");
+		LEGACY_TO_MINIMESSAGE.put('6', "gold");
+		LEGACY_TO_MINIMESSAGE.put('7', "gray");
+		LEGACY_TO_MINIMESSAGE.put('8', "dark_gray");
+		LEGACY_TO_MINIMESSAGE.put('9', "blue");
+		LEGACY_TO_MINIMESSAGE.put('a', "green");
+		LEGACY_TO_MINIMESSAGE.put('b', "aqua");
+		LEGACY_TO_MINIMESSAGE.put('c', "red");
+		LEGACY_TO_MINIMESSAGE.put('d', "light_purple");
+		LEGACY_TO_MINIMESSAGE.put('e', "yellow");
+		LEGACY_TO_MINIMESSAGE.put('f', "white");
+		LEGACY_TO_MINIMESSAGE.put('k', "obfuscated");
+		LEGACY_TO_MINIMESSAGE.put('l', "bold");
+		LEGACY_TO_MINIMESSAGE.put('m', "strikethrough");
+		LEGACY_TO_MINIMESSAGE.put('n', "underlined");
+		LEGACY_TO_MINIMESSAGE.put('o', "italic");
+		LEGACY_TO_MINIMESSAGE.put('r', "reset");
+	}
 
 	private LuckPerms luckPerms;
 
@@ -80,11 +107,11 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 	private Component mergeFormatAndMessage(final String format, final Component messageComponent) {
 		final int index = format.indexOf(MESSAGE_PLACEHOLDER);
 		if (index < 0) {
-			return LEGACY_SERIALIZER.deserialize(format).append(messageComponent);
+			return MINI_MESSAGE.deserialize(format).append(messageComponent);
 		}
 
-		final Component before = LEGACY_SERIALIZER.deserialize(format.substring(0, index));
-		final Component after = LEGACY_SERIALIZER.deserialize(format.substring(index + MESSAGE_PLACEHOLDER.length()));
+		final Component before = MINI_MESSAGE.deserialize(format.substring(0, index));
+		final Component after = MINI_MESSAGE.deserialize(format.substring(index + MESSAGE_PLACEHOLDER.length()));
 		return before.append(messageComponent).append(after);
 	}
 
@@ -102,7 +129,7 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 				.replace("{suffixes}", String.join("", metaData.getSuffixes().values()))
 				.replace("{world}", player.getWorld().getName())
 				.replace("{name}", player.getName())
-				.replace("{displayname}", LEGACY_SERIALIZER.serialize(player.displayName()))
+				.replace("{displayname}", MINI_MESSAGE.serialize(player.displayName()))
 				.replace("{username-color}", Optional.ofNullable(metaData.getMetaValue("username-color")).orElse(""))
 				.replace("{message-color}", Optional.ofNullable(metaData.getMetaValue("message-color")).orElse(""));
 
@@ -110,7 +137,24 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 			format = PlaceholderAPI.setPlaceholders(player, format);
 		}
 
-		return colorize(translateHexColorCodes(format));
+		// Convert legacy '&' color/format codes and '&#RRGGBB' hex codes into MiniMessage
+		// tags so that the whole format string (prefixes, suffixes, static text, etc.)
+		// is rendered through MiniMessage, alongside any actual MiniMessage tags already
+		// present in the config, prefixes or suffixes.
+		return translateLegacyToMiniMessage(format);
+	}
+
+	private String translateLegacyToMiniMessage(final String message) {
+		String result = HEX_PATTERN.matcher(message).replaceAll("<#$1>");
+
+		final Matcher matcher = LEGACY_CODE_PATTERN.matcher(result);
+		final StringBuilder buffer = new StringBuilder(result.length() + 16);
+		while (matcher.find()) {
+			final String tag = LEGACY_TO_MINIMESSAGE.get(Character.toLowerCase(matcher.group(1).charAt(0)));
+			matcher.appendReplacement(buffer, tag != null ? "<" + tag + ">" : Matcher.quoteReplacement(matcher.group()));
+		}
+		matcher.appendTail(buffer);
+		return buffer.toString();
 	}
 
 	private Component applyMessageColors(Player player, String message) {
