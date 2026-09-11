@@ -1,6 +1,6 @@
 name: LPCPlus
 description: A chat formatting plugin for LuckPerms.
-version: 3.7.1
+version: 3.7.2
 main: me.wikmor.lpcplus.LPCPlus
 authors:
   - WikMor
@@ -27,4 +27,3 @@ permissions:
   lpcplus.minimessage:
     description: Allows using MiniMessage formatting (colors, gradients, hover/click, etc.) in chat.
     default: false
-
