@@ -6,6 +6,7 @@ authors:
   - WikMor
   - XCraftTM
 api-version: 1.21
+folia-supported: true
 depend: [LuckPerms]
 softdepend: [PlaceholderAPI]
 commands:

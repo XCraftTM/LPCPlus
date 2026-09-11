@@ -18,11 +18,13 @@ color code, and MiniMessage support.
   chat formats.
 - ✅ **Built on the modern Paper chat API** — no deprecated Bukkit chat APIs; formatting is done
   using Adventure `Component`s under the hood for full compatibility with modern clients.
+- ✅ **Folia compatible** — no scheduler or main-thread-only calls, so it works out of the box on
+  [Folia](https://papermc.io/software/folia) as well as Paper/Spigot.
 - ✅ **Config reload command** — reload your configuration without restarting the server.
 
 ## Requirements
 
-- [Paper](https://papermc.io/) (or a Paper fork) **1.21+**
+- [Paper](https://papermc.io/) (or a Paper fork, including [Folia](https://papermc.io/software/folia)) **1.21+**
 - [LuckPerms](https://luckperms.net/) (required, used for groups/prefixes/suffixes/meta)
 - [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) (optional, soft-depend)
 
