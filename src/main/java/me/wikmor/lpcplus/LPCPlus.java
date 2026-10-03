@@ -63,6 +63,7 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 	}
 
 	private LuckPerms luckPerms;
+	private final Set<UUID> tablistNames = new HashSet<>();
 
 	@Override
 	public void onEnable() {
@@ -178,18 +179,22 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 	}
 
 	private void updateTablistName(final Player player) {
-		if (!getConfig().getBoolean("tablist.enabled")) return;
+		if (!getConfig().getBoolean("tablist.enabled")) {
+			updateTablistName(player, null);
+			return;
+		}
 		final CachedMetaData metaData = luckPerms.getPlayerAdapter(Player.class).getMetaData(player);
 		updateTablistName(player, metaData);
 	}
 
 	private void updateTablistName(final Player player, final CachedMetaData metaData) {
 		if (!getConfig().getBoolean("tablist.enabled")) {
-			player.setPlayerListName(null);
+			if (tablistNames.remove(player.getUniqueId())) player.playerListName(null);
 			return;
 		}
 		final String format = getConfig().getString("tablist.format", "{prefix}{username-color}{name}{suffix}");
-		player.setPlayerListName(MINI_MESSAGE.deserialize(formatText(player, metaData, format)));
+		player.playerListName(MINI_MESSAGE.deserialize(formatText(player, metaData, format)));
+		tablistNames.add(player.getUniqueId());
 	}
 
 	private Component applyMessageColors(Player player, String message) {
