@@ -66,6 +66,7 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 
 	private LuckPerms luckPerms;
 	private final Set<UUID> tablistNames = ConcurrentHashMap.newKeySet();
+	private volatile boolean tablistEnabled;
 
 	@Override
 	public void onEnable() {
@@ -73,13 +74,13 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 		this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
 
 		saveDefaultConfig();
+		tablistEnabled = getConfig().getBoolean("tablist.enabled");
 		getServer().getPluginManager().registerEvents(this, this);
 		luckPerms.getEventBus().subscribe(this, UserDataRecalculateEvent.class, event -> {
+			if (!tablistEnabled) return;
 			final UUID uniqueId = event.getUser().getUniqueId();
-			Bukkit.getGlobalRegionScheduler().run(this, task -> {
-				final Player player = Bukkit.getPlayer(uniqueId);
-				if (player != null) updateTablistName(player);
-			});
+			final Player player = Bukkit.getPlayer(uniqueId);
+			if (player != null) updateTablistName(player);
 		});
 		Bukkit.getOnlinePlayers().forEach(this::updateTablistName);
 
@@ -91,6 +92,7 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 							 final @NotNull String label, final String[] args) {
 		if (args.length == 1 && "reload".equalsIgnoreCase(args[0])) {
 			reloadConfig();
+			tablistEnabled = getConfig().getBoolean("tablist.enabled");
 			Bukkit.getOnlinePlayers().forEach(this::updateTablistName);
 			sender.sendMessage(colorize("&aLPCPlus has been reloaded."));
 			return true;
@@ -198,8 +200,9 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 
 	private void updateTablistNameOnEntity(final Player player) {
 		if (!player.isOnline()) return;
-		if (!getConfig().getBoolean("tablist.enabled")) {
-			if (tablistNames.remove(player.getUniqueId())) player.playerListName(null);
+		if (!tablistEnabled) {
+			tablistNames.remove(player.getUniqueId());
+			player.playerListName(null);
 			return;
 		}
 		final CachedMetaData metaData = luckPerms.getPlayerAdapter(Player.class).getMetaData(player);

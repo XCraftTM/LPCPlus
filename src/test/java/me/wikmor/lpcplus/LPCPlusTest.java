@@ -31,7 +31,7 @@ class LPCPlusTest {
 	}
 
 	@Test
-	void leavesIncompleteSectionSignHexPrefixUntranslated() {
+	void preservesIncompleteSectionSignHexMarkerAndTranslatesFollowingCodes() {
 		assertEquals("§x<dark_blue><dark_green>",
 				LPCPlus.translateLegacyToMiniMessage("§x§1§2"));
 	}
