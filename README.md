@@ -20,8 +20,8 @@ color code, and MiniMessage support.
   chat formats.
 - ✅ **Built on the modern Paper chat API** — no deprecated Bukkit chat APIs; formatting is done
   using Adventure `Component`s under the hood for full compatibility with modern clients.
-- ✅ **Folia compatible** — no scheduler or main-thread-only calls, so it works out of the box on
-  [Folia](https://papermc.io/software/folia) as well as Paper/Spigot.
+- ✅ **Folia compatible** — player-specific tab list updates use entity schedulers, so they work on
+  [Folia](https://papermc.io/software/folia) as well as Paper.
 - ✅ **Config reload command** — reload your configuration without restarting the server.
 
 ## Requirements

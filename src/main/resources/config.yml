@@ -57,4 +57,5 @@ tablist:
 #   legacy codes, '&#RRGGBB' hex codes and native MiniMessage tags anywhere in the format, e.g.:
 #   "<gradient:red:blue>{prefix}</gradient>&f{name}&r: {message}"
 # - Set 'tablist.enabled' to true to show the configured 'tablist.format' for player names
-#   in the tab list. It accepts the same LuckPerms placeholders as chat formats.
+#   in the tab list. It accepts all chat-format placeholders except {message}, plus
+#   PlaceholderAPI placeholders when PlaceholderAPI is installed.

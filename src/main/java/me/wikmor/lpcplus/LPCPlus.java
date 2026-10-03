@@ -10,6 +10,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -73,9 +74,16 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 
 		saveDefaultConfig();
 		getServer().getPluginManager().registerEvents(this, this);
+		luckPerms.getEventBus().subscribe(this, UserDataRecalculateEvent.class, event -> {
+			final UUID uniqueId = event.getUser().getUniqueId();
+			Bukkit.getGlobalRegionScheduler().run(this, task -> {
+				final Player player = Bukkit.getPlayer(uniqueId);
+				if (player != null) updateTablistName(player);
+			});
+		});
 		Bukkit.getOnlinePlayers().forEach(this::updateTablistName);
 
-		getLogger().info("✅ LPCPlus enabled (Spigot/Paper compatible)");
+		getLogger().info("✅ LPCPlus enabled (Paper/Folia compatible)");
 	}
 
 	@Override
