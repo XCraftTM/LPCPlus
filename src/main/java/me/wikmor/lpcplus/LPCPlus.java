@@ -64,7 +64,7 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 	}
 
 	private LuckPerms luckPerms;
-	private final Set<UUID> tablistNames = new HashSet<>();
+	private final Set<UUID> tablistNames = ConcurrentHashMap.newKeySet();
 
 	@Override
 	public void onEnable() {
@@ -163,7 +163,7 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 		return translateLegacyToMiniMessage(format);
 	}
 
-	private String translateLegacyToMiniMessage(final String message) {
+	static String translateLegacyToMiniMessage(final String message) {
 		String result = HEX_PATTERN.matcher(message).replaceAll("<#$1>");
 		final Matcher sectionHexMatcher = SECTION_HEX_PATTERN.matcher(result);
 		final StringBuffer sectionHexBuffer = new StringBuffer(result.length());
@@ -185,6 +185,11 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 	}
 
 	private void updateTablistName(final Player player) {
+		player.getScheduler().run(this, task -> updateTablistNameOnEntity(player), null);
+	}
+
+	private void updateTablistNameOnEntity(final Player player) {
+		if (!player.isOnline()) return;
 		if (!getConfig().getBoolean("tablist.enabled")) {
 			if (tablistNames.remove(player.getUniqueId())) player.playerListName(null);
 			return;
