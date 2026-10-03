@@ -18,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -101,6 +102,11 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 		updateTablistName(event.getPlayer());
 	}
 
+	@EventHandler
+	public void onPlayerQuit(final PlayerQuitEvent event) {
+		tablistNames.remove(event.getPlayer().getUniqueId());
+	}
+
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onChat(final AsyncChatEvent event) {
 		final Player player = event.getPlayer();
@@ -180,18 +186,10 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 
 	private void updateTablistName(final Player player) {
 		if (!getConfig().getBoolean("tablist.enabled")) {
-			updateTablistName(player, null);
-			return;
-		}
-		final CachedMetaData metaData = luckPerms.getPlayerAdapter(Player.class).getMetaData(player);
-		updateTablistName(player, metaData);
-	}
-
-	private void updateTablistName(final Player player, final CachedMetaData metaData) {
-		if (!getConfig().getBoolean("tablist.enabled")) {
 			if (tablistNames.remove(player.getUniqueId())) player.playerListName(null);
 			return;
 		}
+		final CachedMetaData metaData = luckPerms.getPlayerAdapter(Player.class).getMetaData(player);
 		final String format = getConfig().getString("tablist.format", "{prefix}{username-color}{name}{suffix}");
 		player.playerListName(MINI_MESSAGE.deserialize(formatText(player, metaData, format)));
 		tablistNames.add(player.getUniqueId());

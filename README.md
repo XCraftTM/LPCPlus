@@ -74,6 +74,7 @@ group-formats:
 
 # Optional tab list formatting
 tablist:
+  # Set to true to enable this feature (default: false).
   enabled: true
   format: "{prefix}{username-color}{name}{suffix}"
 ```
