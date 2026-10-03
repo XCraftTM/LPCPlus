@@ -9,7 +9,9 @@ color code, and MiniMessage support.
   prefixes, suffixes, and custom meta values directly from LuckPerms.
 - ✅ **Per-group chat formats** — define a different chat format for every LuckPerms group, with a
   sensible fallback (`chat-format`) for groups that don't have one.
-- ✅ **Legacy `&` color codes** — classic Bukkit color codes, gated behind a permission.
+- ✅ **Tab list formatting** — optionally display LuckPerms prefixes, suffixes, and colors in player
+  names in the tab list.
+- ✅ **Legacy `&` and `§` color codes** — classic Bukkit color codes, gated behind a permission.
 - ✅ **Hex colors** — `&#RRGGBB` hex color codes, gated behind a permission.
 - ✅ **MiniMessage support** — let trusted players use full [MiniMessage](https://docs.advntr.dev/minimessage/format.html)
   formatting in their messages (gradients, rainbows, hover text, click events, and more), with a
@@ -47,7 +49,7 @@ color code, and MiniMessage support.
 | Permission             | Description                                                                 | Default |
 |-------------------------|------------------------------------------------------------------------------|---------|
 | `lpcplus.reload`        | Allows reloading the LPCPlus configuration.                                  | `op`    |
-| `lpcplus.colorcodes`    | Allows using `&` legacy color codes in chat messages.                        | `false` |
+| `lpcplus.colorcodes`    | Allows using `&` or `§` legacy color codes in chat messages.                  | `false` |
 | `lpcplus.rgbcodes`      | Allows using `&#RRGGBB` hex color codes in chat messages.                    | `false` |
 | `lpcplus.minimessage`   | Allows using full MiniMessage formatting in chat messages.                  | `false` |
 
@@ -69,6 +71,11 @@ group-formats:
   vip: "&#FFD700{prefix}&#FFD700{name}&r: &#FFFAAA{message}"
   mod: "&#00FFAA{prefix}&#00FFAA{name}&r: &#00FFDD{message}"
   admin: "&#FF5555{prefix}&#FF5555{name}&r: &#FFAAAA{message}"
+
+# Optional tab list formatting
+tablist:
+  enabled: true
+  format: "{prefix}{username-color}{name}{suffix}"
 ```
 
 ### Available placeholders
@@ -92,8 +99,8 @@ PlaceholderAPI and the relevant expansion are installed.
 
 ### Colors
 
-- Legacy codes: `&a`, `&c`, `&l`, etc. — requires `lpcplus.colorcodes` for player messages (formats
-  themselves always support these).
+- Legacy codes: `&a`, `§a`, `&c`, `§c`, etc. — requires `lpcplus.colorcodes` for player messages
+  (formats themselves always support these).
 - Hex codes: `&#RRGGBB` (e.g. `&#FF0000`) — requires `lpcplus.rgbcodes` for player messages.
 - MiniMessage: `<red>`, `<gradient:red:blue>`, `<rainbow>`, `<hover:show_text:'hi'>`, etc. — requires
   `lpcplus.minimessage` for player messages. See the

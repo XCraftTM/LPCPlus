@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +28,9 @@ import java.util.regex.Pattern;
 public final class LPCPlus extends JavaPlugin implements Listener {
 
 	private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
-	private static final Pattern LEGACY_CODE_PATTERN = Pattern.compile("(?i)&([0-9A-FK-OR])");
+	private static final Pattern SECTION_HEX_PATTERN =
+			Pattern.compile("(?i)§x§([a-f0-9])§([a-f0-9])§([a-f0-9])§([a-f0-9])§([a-f0-9])§([a-f0-9])");
+	private static final Pattern LEGACY_CODE_PATTERN = Pattern.compile("(?i)[&§]([0-9A-FK-OR])");
 	private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
 	private static final LegacyComponentSerializer AMPERSAND_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
 	private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
@@ -68,6 +71,7 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 
 		saveDefaultConfig();
 		getServer().getPluginManager().registerEvents(this, this);
+		Bukkit.getOnlinePlayers().forEach(this::updateTablistName);
 
 		getLogger().info("✅ LPCPlus enabled (Spigot/Paper compatible)");
 	}
@@ -77,6 +81,7 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 							 final @NotNull String label, final String[] args) {
 		if (args.length == 1 && "reload".equalsIgnoreCase(args[0])) {
 			reloadConfig();
+			Bukkit.getOnlinePlayers().forEach(this::updateTablistName);
 			sender.sendMessage(colorize("&aLPCPlus has been reloaded."));
 			return true;
 		}
@@ -88,6 +93,11 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 									  final @NotNull String alias, final String[] args) {
 		if (args.length == 1) return Collections.singletonList("reload");
 		return Collections.emptyList();
+	}
+
+	@EventHandler
+	public void onPlayerJoin(final PlayerJoinEvent event) {
+		updateTablistName(event.getPlayer());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -116,12 +126,14 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 	}
 
 	private String buildFormat(Player player, CachedMetaData metaData, String group) {
-		String format = getConfig().getString(
+		final String format = getConfig().getString(
 				getConfig().getString("group-formats." + group) != null ?
 						"group-formats." + group : "chat-format");
 
-		if (format == null) format = "{name}: {message}";
+		return formatText(player, metaData, format == null ? "{name}: {message}" : format);
+	}
 
+	private String formatText(final Player player, final CachedMetaData metaData, String format) {
 		format = format
 				.replace("{prefix}", Optional.ofNullable(metaData.getPrefix()).orElse(""))
 				.replace("{suffix}", Optional.ofNullable(metaData.getSuffix()).orElse(""))
@@ -146,6 +158,14 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 
 	private String translateLegacyToMiniMessage(final String message) {
 		String result = HEX_PATTERN.matcher(message).replaceAll("<#$1>");
+		final Matcher sectionHexMatcher = SECTION_HEX_PATTERN.matcher(result);
+		final StringBuffer sectionHexBuffer = new StringBuffer(result.length());
+		while (sectionHexMatcher.find()) {
+			sectionHexMatcher.appendReplacement(sectionHexBuffer, "<#"
+					+ sectionHexMatcher.group(1) + sectionHexMatcher.group(2) + sectionHexMatcher.group(3)
+					+ sectionHexMatcher.group(4) + sectionHexMatcher.group(5) + sectionHexMatcher.group(6) + ">");
+		}
+		result = sectionHexMatcher.appendTail(sectionHexBuffer).toString();
 
 		final Matcher matcher = LEGACY_CODE_PATTERN.matcher(result);
 		final StringBuilder buffer = new StringBuilder(result.length() + 16);
@@ -155,6 +175,21 @@ public final class LPCPlus extends JavaPlugin implements Listener {
 		}
 		matcher.appendTail(buffer);
 		return buffer.toString();
+	}
+
+	private void updateTablistName(final Player player) {
+		if (!getConfig().getBoolean("tablist.enabled")) return;
+		final CachedMetaData metaData = luckPerms.getPlayerAdapter(Player.class).getMetaData(player);
+		updateTablistName(player, metaData);
+	}
+
+	private void updateTablistName(final Player player, final CachedMetaData metaData) {
+		if (!getConfig().getBoolean("tablist.enabled")) {
+			player.setPlayerListName(null);
+			return;
+		}
+		final String format = getConfig().getString("tablist.format", "{prefix}{username-color}{name}{suffix}");
+		player.setPlayerListName(MINI_MESSAGE.deserialize(formatText(player, metaData, format)));
 	}
 
 	private Component applyMessageColors(Player player, String message) {

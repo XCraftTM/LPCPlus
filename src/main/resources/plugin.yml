@@ -19,7 +19,7 @@ permissions:
     description: Allows reloading the LPCPlus configuration.
     default: op
   lpcplus.colorcodes:
-    description: Allows using '&' legacy color codes in chat.
+    description: Allows using '&' or '§' legacy color codes in chat.
     default: false
   lpcplus.rgbcodes:
     description: Allows using '&#RRGGBB' hex color codes in chat.
